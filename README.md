@@ -51,6 +51,7 @@ réponse inventée : l'écran dit qu'il ne sait pas.
 | `GET /ask?q=...` | poser une question : TF-IDF + LLM + réponse |
 | `GET /supprime?i=3` | supprimer une note |
 | `GET /liste` | contenu de la micro SD |
+| `POST /fichier?p=/sdcard/NOM` | poser un fichier sur la carte (vide = effacer) |
 
 ```bash
 curl "http://192.168.8.209/note?t=Le%20train%20pour%20Paris%20part%20a%20huit%20heures"

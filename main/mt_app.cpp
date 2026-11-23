@@ -816,6 +816,33 @@ static esp_err_t h_carnet(httpd_req_t *req)
     return httpd_resp_send(req, out, (ssize_t)n);
 }
 
+/* POST /fichier?p=/sdcard/NOM : pose un fichier sur la micro SD
+   (corps vide = effacer). Reserve au reseau local, chemin impose. */
+static esp_err_t h_fichier(httpd_req_t *req)
+{
+    char p[96];
+    if (qval(req, "p", p, sizeof(p)) != 0) return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "p");
+    if (strncmp(p, "/sdcard/", 8) != 0 || strstr(p, ".."))
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "chemin");
+    if (!g_sd_ok) { httpd_resp_set_status(req, "503 Service Unavailable"); return httpd_resp_send(req, "sd", 2); }
+    if (req->content_len == 0) { remove(p); return httpd_resp_send(req, "0", 1); }
+    if (req->content_len > 8 * 1024 * 1024) return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "taille");
+    FILE *f = fopen(p, "wb");
+    if (!f) { httpd_resp_set_status(req, "500 Internal Server Error"); return httpd_resp_send(req, "io", 2); }
+    char buf[1024];
+    int recu = 0;
+    while (recu < (int)req->content_len) {
+        int n = httpd_req_recv(req, buf, sizeof(buf));
+        if (n <= 0) { fclose(f); return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "recv"); }
+        if ((int)fwrite(buf, 1, (size_t)n, f) != n) { fclose(f); return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "write"); }
+        recu += n;
+    }
+    fclose(f);
+    char m[24];
+    snprintf(m, sizeof(m), "%d", recu);
+    return httpd_resp_send(req, m, HTTPD_RESP_USE_STRLEN);
+}
+
 static esp_err_t h_liste(httpd_req_t *req)
 {
     if (!g_sd_ok) { httpd_resp_set_status(req, "503 Service Unavailable"); return httpd_resp_send(req, "sd", 2); }
@@ -846,7 +873,7 @@ static void http_demarre(void)
     httpd_handle_t srv = NULL;
     httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
     cfg.stack_size = 8192;
-    cfg.max_uri_handlers = 12;   /* 9 routes : la limite par defaut est 8 */
+    cfg.max_uri_handlers = 14;   /* 9 routes : la limite par defaut est 8 */
     cfg.lru_purge_enable = true;
     if (httpd_start(&srv, &cfg) != ESP_OK) { ESP_LOGE(TAG, "HTTP indisponible"); return; }
     httpd_uri_t u[] = {
@@ -859,6 +886,7 @@ static void http_demarre(void)
         { "/liste",    HTTP_GET,  h_liste,    NULL },
         { "/efface",   HTTP_GET,  h_efface,   NULL },
         { "/carnet",   HTTP_GET,  h_carnet,   NULL },
+        { "/fichier",  HTTP_POST, h_fichier,  NULL },
     };
     for (size_t i = 0; i < sizeof(u) / sizeof(u[0]); i++) httpd_register_uri_handler(srv, &u[i]);
     ESP_LOGI(TAG, "API prete : /etat /ecran /bouton /note /ask /supprime /liste");

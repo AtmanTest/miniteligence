@@ -1,5 +1,12 @@
 # Journal des versions
 
+## 1.0.2 — 2026-11-23 — copie sur la micro SD
+
+- `POST /fichier?p=/sdcard/NOM` : pose un fichier sur la carte (corps vide =
+  effacement), 8 Mo maximum, chemin impose sous /sdcard. Verifie : le zip
+  sources `MT101.ZIP` (1 995 189 octets) est sur la carte.
+- 14 routes HTTP autorisees.
+
 ## 1.0.1 — 2026-11-23 — lisibilité des écrans
 
 - MÉMOIRE : 3 notes par page (au lieu de 4), séparateurs, plus de chevauchement

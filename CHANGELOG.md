@@ -1,5 +1,16 @@
 # Journal des versions
 
+## 1.0.1 — 2026-11-23 — lisibilité des écrans
+
+- MÉMOIRE : 3 notes par page (au lieu de 4), séparateurs, plus de chevauchement
+  avec la pagination.
+- RÉVISION : « B1 : JE SAVAIS » en bandeau noir (l'action principale se voit),
+  « B1X2 : A REVOIR » encadré, pied dégagé.
+- SYSTÈME : signature sur deux lignes, plus de débordement sous le pied.
+- LLM : capture du corps par événement HTTP (la version précédente perdait la
+  réponse et retombait sur la recherche locale) ; /etat expose le statut.
+- /carnet, /efface ; limite de 9 routes HTTP (12 déclarées).
+
 ## 1.0.0 — 2026-11-23 — MiniTelligence
 
 Première version complète, sur la carte BATMino.

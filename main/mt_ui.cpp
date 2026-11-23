@@ -275,8 +275,8 @@ static void p_revision(const mt_vue_t *v)
     plein(FX0, 44, FX1, 44, 1);
     paragraphe(6, 54, 186, n->txt, 6, 13);
 
-    sel_bar(142, 15, false);
-    t5w(8, 144, "B1 : JE SAVAIS");
+    plein(0, 140, 199, 155, 1);
+    t5w(8, 142, "B1 : JE SAVAIS");
     cadre(6, 160, 194, 174, 1);
     t5(10, 163, "B1X2 : A REVOIR");
 }
